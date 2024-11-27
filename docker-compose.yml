@@ -1,0 +1,35 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastapi_app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app"
+    volumes:
+      - ./src:/app/src
+      - ./pyproject.toml:/app/pyproject.toml
+      - ./poetry.lock:/app/poetry.lock
+    env_file:
+      - .env
+    command: >
+      uvicorn src.main:app
+      --host 0.0.0.0
+      --port 8000
+      --log-level info
+      --reload
+    restart: always
+
+  redis:
+    image: redis:7
+    container_name: redis_server
+    ports:
+      - "6379:6379"
+    restart: always
